@@ -22,7 +22,8 @@ int main(int argc, char *argv[]) {
         print_usage();
         return 1;
     }
-    
+
+    /*parse integers and flags*/
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-b") == 0) {
             b_flag = 1;
