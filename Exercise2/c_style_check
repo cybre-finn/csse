@@ -1,0 +1,109 @@
+#! /usr/bin/env python3
+
+#
+# A simple-minded style checker for C code.
+# This only catches the most obvious style mistakes, and occasionally
+# flags stuff that isn't wrong.
+#
+
+import re
+import sys
+
+MAX_LINE_LENGTH = 78
+
+#
+# Regular expressions corresponding to style violations.
+#
+tabs = re.compile(r"\t+")
+comma_space = re.compile(r",[^ ]")
+operator_space = re.compile(r"(?<!\s)(?<!\+)(?<!-)([+\-*/%]=?|==|<=|>=|!=)(?!\s)(?![+\-])")
+comment_line = re.compile(r"^\s*/\*.*\*/\s*$")
+open_comment_space = re.compile(r"/\*[^ *\n]")
+close_comment_space = re.compile(r"[^ *]\*/")
+paren_curly_space = re.compile(r"\)\{")
+c_plus_plus_comment = re.compile(r"//")
+semi_space = re.compile(r";[^\s]")
+
+def remove_comments_and_strings(line):
+    # Remove all string literals
+    line = re.sub(r'"([^"\\]|\\.)*"', '', line)
+    line = re.sub(r"'([^'\\]|\\.)*'", '', line)
+    # Remove all C-style comments
+    line = re.sub(r"/\*.*?\*/", '', line)
+    # Remove all C++-style comments
+    line = re.sub(r"//.*", '', line)
+    return line
+
+def check_line(filename, line, n):
+    """
+    Check a line of code for style mistakes.
+    """
+
+    # Strip the terminal newline.
+    line = line.rstrip('\n')
+
+    # Skip blank lines
+    if not line.strip():
+        return
+
+    # Skip lines that are only C-style comments (/** ... */, /* ... */, */)
+    if re.match(r'^\s*/\*.*\*/\s*$', line) or \
+       re.match(r'^\s*/\*\*?\s*$', line) or \
+       re.match(r'^\s*\*/\s*$', line):
+        return
+
+    code_only = remove_comments_and_strings(line)
+
+    if tabs.search(line):
+        print("File: %s, line %d: [TABS]:\n%s" % (filename, n, line))
+    if len(line) > MAX_LINE_LENGTH:
+        print(
+            "File: %s, line %d: [TOO LONG (%d CHARS)]:\n%s"
+            % (filename, n, len(line), line)
+        )
+    if comma_space.search(line):
+        print("File: %s, line %d: [PUT SPACE AFTER COMMA]:\n%s" % (filename, n, line))
+    if operator_space.search(code_only):
+        print(
+            "File: %s, line %d: [PUT SPACE AROUND OPERATORS]:\n%s"
+            % (filename, n, line)
+        )
+    if open_comment_space.search(line):
+        print(
+            "File: %s, line %d: [PUT SPACE AFTER OPEN COMMENT]:\n%s"
+            % (filename, n, line)
+        )
+    if close_comment_space.search(line):
+        print(
+            "File: %s, line %d: [PUT SPACE BEFORE CLOSE COMMENT]:\n%s"
+            % (filename, n, line)
+        )
+    if paren_curly_space.search(line):
+        print(
+            "File: %s, line %d: [PUT SPACE BETWEEN ) AND {]:\n%s" % (filename, n, line)
+        )
+    if c_plus_plus_comment.search(line):
+        print(
+            "File: %s, line %d: [AVOID C++ STYLE COMMENT]:\n%s"
+            % (filename, n, line)
+        )
+    if semi_space.search(line):
+        print(
+            "File: %s, line %d: [PUT SPACE AFTER SEMICOLON]:\n%s"
+            % (filename, n, line)
+        )
+
+def check_file(filename):
+    with open(filename, "r") as file:
+        lines = file.readlines()
+    for i, line in enumerate(lines, 1):
+        check_line(filename, line, i)
+
+usage = "usage: c_style_check filename1 [filename2 ...]"
+
+if len(sys.argv) < 2:
+    print(usage)
+    raise SystemExit
+
+for filename in sys.argv[1:]:
+    check_file(filename)

@@ -11,6 +11,7 @@
         binutils
         pkg-config
         clang-tools
+	python314
       ];
     };
   };

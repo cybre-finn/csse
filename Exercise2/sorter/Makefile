@@ -1,0 +1,24 @@
+#
+# Einfuehrung in die Programmiersprache C++
+#
+# Makefile fuer Aufgabe 3 (sorter)
+#
+
+CC     = gcc
+CFLAGS = -g -Wall -Wstrict-prototypes -ansi -pedantic
+
+sorter: sorter.o
+	$(CC) sorter.o -o sorter
+
+sorter.o: sorter.c
+	$(CC) $(CFLAGS) -c sorter.c
+
+test:
+	./run_test
+
+check:
+	./c_style_check sorter.c
+
+clean:
+	rm -f sorter *.o
+
