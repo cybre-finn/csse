@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+/*Element sort. Will iterate over part of the array for every element*/
 void element_sort(int arr[], int num_elements) {
     int start = 0;
     int temp;
@@ -91,6 +92,7 @@ void element_sort(int arr[], int num_elements) {
     }
 }
 
+/*Bubble sort. Iterates through the array, compares neighboring elements, swaps them if they are in the wrong order.*/
 void bubble_sort(int arr[], int len) {
     int i, j, temp;
     int k;
