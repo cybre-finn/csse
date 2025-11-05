@@ -1,0 +1,4 @@
+*.o
+*.out
+automaton_arr_impl
+automaton_ptr_impl
