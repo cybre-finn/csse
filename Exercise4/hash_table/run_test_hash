@@ -1,0 +1,46 @@
+#! /usr/bin/env python3
+
+# Sort the file to avoid reporting an error due to a different
+# word order.
+
+import sys
+import os
+from subprocess import getoutput, getstatusoutput
+
+# Run the test program and capture output
+output = getoutput("./test_hash_table test.in")
+
+# Sort the output lines
+sorted_output = '\n'.join(sorted(output.split('\n')))
+
+# Write sorted output to temporary file
+with open('test2', 'w') as f:
+    f.write(sorted_output)
+
+# Read and sort the correct output
+with open('correct_test.out', 'r') as f:
+    correct_output = f.read()
+
+sorted_correct = '\n'.join(sorted(correct_output.split('\n')))
+
+# Get rid of memory allocation messages
+filtered_lines = []
+for line in sorted_output.split('\n'):
+    if not line.startswith('Allocating') and not line.startswith('Freeing'):
+        filtered_lines.append(line + "\n")
+sorted_output = ''.join(filtered_lines)
+
+# Compare outputs
+if sorted_output.strip() == sorted_correct.strip():
+    print("\033[92mTest succeeded!")
+    exit_code = 0
+else:
+    print("\033[91mTest failed!")
+    exit_code = 1
+
+# Clean up temporary file
+if os.path.exists('test2'):
+    os.remove('test2')
+
+sys.exit(exit_code)
+
